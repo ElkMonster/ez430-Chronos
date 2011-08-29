@@ -54,11 +54,12 @@ EZ430Chronos {
 		UI.registerForShutdown({ this.removeAll });
 	}
 
-	// Creates a EZ430Chronos instance. If no port is specified, /dev/ttyACM0 is
+	// Creates a EZ430Chronos instance. If no port is specified, /dev/ttyACMn is
 	// opened. A custom name for the instance can be specified, otherwise name
-	// is set to "ChronosN", where N is a consecutive number, beginning at 0 for
-	// the first chronos.
-	*new { |portname = "/dev/ttyACM0", name|
+	// is set to "ChronosN". n/N in ttyACMn and ChronosN is a consecutive
+	// number, beginning at 0 for the first chronos.
+	*new { |portname, name|
+		portname = portname ? ("/dev/ttyACM" ++ allEZ430.size);
 		name = name ? ("Chronos" ++ allEZ430.size);
 		this.log("Creating new eZ430 Chronos (" ++ name ++ ") at " ++ portname);
 		^super.new.init(portname, name);

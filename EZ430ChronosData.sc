@@ -3,7 +3,7 @@ EZ430ChronosData {
 	//
 	var <raw, <rawMin, <rawMax;
 	var <cal, <calMin, <calMax;
-	var historyG, currIdx;
+	var <historyG;
 	var <g, <gMin, <gMax;
 	var <angle;
 	var <smoothedG;
@@ -12,7 +12,7 @@ EZ430ChronosData {
 	var <meanG;
 	var <normG;
 
-	*new { |historySize = 15|
+	*new { |historySize = 10|
 		^super.new.init(historySize);
 	}
 
@@ -23,7 +23,7 @@ EZ430ChronosData {
 		calMax = -9999.dup(3);		
 		gMin = 10.dup(3);
 		gMax = -10.dup(3);
-		this.createHistoryBuffer(historySize);
+		historyG = WrapList(historySize, [0, 0, 0]);
 	}
 
 	update { |xyz, rawXYZ|
@@ -40,18 +40,17 @@ EZ430ChronosData {
 		gMin = gMin.min(g);
 		gMax = gMax.max(g);
 
-		currIdx = (currIdx + 1) % historyG.size;
-		historyG[currIdx] = g;
+		historyG.addValue(g);
 
 		angle = g.clip(-1, 1).asin;
 		
-		slopeG = g - this.previousG;
+		slopeG = g - historyG[historyG.size - 1];
 
-		smoothedG = (g + this.previousG) / 2;
+		smoothedG = (g + historyG[historyG.size - 2]) / 2;
 
-		meanG = historyG.sum / historyG.size;
+		meanG = historyG.arr.sum / historyG.size;
 
-		stdDevG = (historyG.sum { |v| (meanG - v).squared } / historyG.size).sqrt;
+		stdDevG = (historyG.arr.sum { |v| (meanG - v).squared } / historyG.size).sqrt;
 
 		normG = g.squared.sum.sqrt;
 
@@ -62,15 +61,6 @@ EZ430ChronosData {
 		calMax = -9999.dup(3);
 		gMin = 3.dup(3);
 		gMax = -3.dup(3);
-	}
-
-	createHistoryBuffer { |size|
-		historyG = Array.fill(size, [0, 0, 0]);
-		currIdx = -1;
-	}
-
-	previousG {
-		^historyG.wrapAt(currIdx - 1);
 	}
 
 }

@@ -13,9 +13,8 @@ EZ430ChronosDataView : QWindow {
 		this.view.decorator = FlowLayout(this.view.bounds);
 
 		graphWin = Window("", Rect(0, 0, 200, 200)).front;
-		graph = SimpleGraph(graphWin, graphWin.view.bounds, helpLines: [[-10,2, 10, 50, 100, 150, 200],[10,20,30]]);
-		graph.yScaleFactor = 30;
-		graph.centerY = 200;
+		graph = SimpleGraph(graphWin, graphWin.view.bounds, helpLines: [1,2,3]);
+		graph.setValueRange(0,4);
 
 		this.createGui;
 

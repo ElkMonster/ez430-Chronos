@@ -8,20 +8,44 @@ EZ430ChronosGUI {
 
 	var updateQueue, updateLock, updateNeeded, updateTask, updateLoopEnabled;
 
-	*new { |portname = "/dev/ttyACM0" ...otherports|
-		^super.new.init( [portname] ++ otherports );
+	*new { |chronosCount = 1, ports, names|
+		var nameCount = 0, portCount = 0, count;
+		if (names.notNil) {
+			if (names.isArray && names.isString.not) {
+				nameCount = names.size;
+			} {
+				nameCount = 1;
+				names = [names];
+			};
+		} {
+			names = [];
+		};
+		if (ports.notNil) {
+			if (ports.isArray && ports.isString.not) {
+				portCount = ports.size;
+			} {
+				portCount = 1;
+				ports = [ports];
+			};
+		} {
+			ports = [];
+		};
+
+		count = max(chronosCount, max(portCount, nameCount));
+
+		^super.new.init( count, ports, names );
 	}
 	
-	init { |portnames|
+	init { |chronosCount, ports, names|
 		updateLock = Semaphore(1);
 		updateNeeded = Condition(false);
 
 		{
 			updateLock.wait;
-			this.createChronos(portnames);
+			this.createChronos(chronosCount, ports, names);
 			this.createGui;
 
-			graphwins = Array.fill(portnames.size, nil);
+			graphwins = Array.fill(chronosCount, nil);
 
 			win.onClose = { this.onClose };
 			win.front;
@@ -31,11 +55,18 @@ EZ430ChronosGUI {
 		this.startUpdateLoop;
 	}
 	
-	createChronos { |portnames|
-		chronos = Array(portnames.size);
-		portnames.do { |p|
-			chronos.add(EZ430Chronos(p));
-		}
+	createChronos { |count, ports, names|
+		chronos = Array(count);
+		count.do { |i|
+			chronos = chronos.add(case
+			    { ports[i].notNil && names[i].notNil } {
+					EZ430Chronos(ports[i], names[i])
+				}
+			    { ports[i].notNil } { EZ430Chronos(portname: ports[i]) }
+			    { names[i].notNil } { EZ430Chronos(name: names[i]) }
+				{ EZ430Chronos.new }
+			);
+		};
 	}
 
 	createControlColumn { |colIdx, window|
