@@ -48,7 +48,7 @@ EZ430ChronosData {
 
 		smoothedG = (g + historyG[historyG.size - 2]) / 2;
 
-		meanG = historyG.arr.sum / historyG.size;
+		meanG = historyG.sum / historyG.size;
 
 		stdDevG = (historyG.arr.sum { |v| (meanG - v).squared } / historyG.size).sqrt;
 

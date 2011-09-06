@@ -60,6 +60,10 @@ WrapList {
 		};
 	}
 
+	sum {
+		^arr.sum;
+	}
+
 	// Prints the array after the class name with a * to mark the insert index
 	printOn { |stream|
 		var arrCopy = arr.copy;
