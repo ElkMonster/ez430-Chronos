@@ -26,7 +26,7 @@ SimpleGraph : QUserView {
 		dataInsIdx = 0;
 		centerY = this.bounds.height / 2;
 
-		this.drawFunc_({ this.drawGraph });
+		this.drawFunc = { this.drawGraph };
 	}
 
 	drawGraph {
