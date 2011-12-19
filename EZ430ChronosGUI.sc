@@ -8,7 +8,7 @@ EZ430ChronosGUI {
 
 	var updateQueue, updateLock, updateNeeded, updateTask, updateLoopEnabled;
 
-	*new { |chronosCount = 1, ports, names|
+	*new { |chronosCount = 1, ports, names, doneFunc|
 		var nameCount = 0, portCount = 0, count;
 		if (names.notNil) {
 			if (names.isArray && names.isString.not) {
@@ -33,10 +33,10 @@ EZ430ChronosGUI {
 
 		count = max(chronosCount, max(portCount, nameCount));
 
-		^super.new.init( count, ports, names );
+		^super.new.init( count, ports, names, doneFunc );
 	}
 	
-	init { |chronosCount, ports, names|
+	init { |chronosCount, ports, names, doneFunc|
 		updateLock = Semaphore(1);
 		updateNeeded = Condition(false);
 
@@ -50,6 +50,8 @@ EZ430ChronosGUI {
 			win.onClose = { this.onClose };
 			win.front;
 			updateLock.signal;
+
+			doneFunc.value(this);
 		}.defer;
 
 		this.startUpdateLoop;
