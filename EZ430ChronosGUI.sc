@@ -1,7 +1,7 @@
 EZ430ChronosGUI {
 
 	var win, xlabel, ylabel, zlabel, graphwins, graphs, dataDetailView;
-	var graphUpdateFunc, rotDispUpdateFunc, detailDispUpdateFunc;
+	var graphUpdateFunc, detailDispUpdateFunc;
 	var vmin, vmax;
 
 	var <chronos;
@@ -72,7 +72,7 @@ EZ430ChronosGUI {
 	}
 
 	createControlColumn { |colIdx, window|
-		var chr, ctrlCol, apBut, ledBut, graphBut, calibBut, calibRotBut, dataDetailBut, label, line;
+		var chr, ctrlCol, apBut, ledBut, graphBut, calibBut, dataDetailBut, label, line;
 
 		chr = chronos[colIdx];
 
@@ -144,18 +144,7 @@ EZ430ChronosGUI {
 		calibBut = Button(ctrlCol, 126@20);
 		calibBut.states = [["Calibrate", nil, Color.grey(0.9)],
 			["Finish Calibration", nil, Color.grey(0.6)]];
-		calibBut.addAction({ |button|
-			if (button.value == 1) {
-				this.enqueueForUpdate { chr.addDataCallback(rotDispUpdateFunc) };
-			} {
-				this.enqueueForUpdate { chr.removeDataCallback(rotDispUpdateFunc) };
-			};
-			chr.calibrate;
-		});
-
-		this.addRotationDisplays(ctrlCol, chr);
-
-		if (chr.isCalibrated) { chr.addDataCallback(rotDispUpdateFunc) };
+		calibBut.addAction({ |button| chr.calibrate });
 
 
 		dataDetailBut = Button(ctrlCol, 140@20);
@@ -175,22 +164,6 @@ EZ430ChronosGUI {
 			};
 		});
 
-	}
-
-	addRotationDisplays { |parent, chronos|
-		var xRotDisp, yRotDisp, zRotDisp;
-
-		rotDispUpdateFunc = { |data|
-			this.enqueueForUpdate({
-				xRotDisp.angle_(data.angle[0]).refresh;
-				yRotDisp.angle_(data.angle[1]).refresh;
-				zRotDisp.angle_(data.angle[2]).refresh;
-			});
-		};
-
-		xRotDisp = AngleDisplay(parent, 50@50);
-		yRotDisp = AngleDisplay(parent, 50@50);
-		zRotDisp = AngleDisplay(parent, 50@50);
 	}
 
 	createGui {
