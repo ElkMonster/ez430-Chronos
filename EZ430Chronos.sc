@@ -49,9 +49,6 @@ EZ430Chronos {
 		eZ430CmdSuccessMsg = [255, 6, 3];
 		eZ430StopAPMsg = Int8Array[255, 9, 3];
 		eZ430ReqDataMsg = Int8Array[255, 8, 7, 0, 0, 0, 0];
-
-		// Call quit() for all instances when shutting down
-		UI.registerForShutdown({ this.removeAll });
 	}
 
 	// Creates a EZ430Chronos instance. If no port is specified, /dev/ttyACMn is
