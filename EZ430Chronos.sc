@@ -51,12 +51,22 @@ EZ430Chronos {
 		eZ430ReqDataMsg = Int8Array[255, 8, 7, 0, 0, 0, 0];
 	}
 
+	*getSerialPortNameByPlatform {
+		var index = allEZ430.size;
+		^Platform.case(
+			// OS X case will fail once you connect  more than 9 chronos'
+			\osx, { "/dev/ttyusbmodem00" ++ (index + 1) },
+			\linux, { "/dev/ttyACM" ++ index },
+			\windows, { "Not implemented" }
+		);
+	}
+
 	// Creates a EZ430Chronos instance. If no port is specified, /dev/ttyACMn is
 	// opened. A custom name for the instance can be specified, otherwise name
 	// is set to "ChronosN". n/N in ttyACMn and ChronosN is a consecutive
 	// number, beginning at 0 for the first chronos.
 	*new { |portname, name|
-		portname = portname ? ("/dev/ttyACM" ++ allEZ430.size);
+		portname = portname ? this.getSerialPortNameByPlatform;
 		name = name ? ("Chronos" ++ allEZ430.size);
 		this.log("Creating new eZ430 Chronos (" ++ name ++ ") at " ++ portname);
 		^super.new.init(portname, name);
