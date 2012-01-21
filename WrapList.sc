@@ -51,6 +51,13 @@ WrapList {
 		insIdx = if (insIdx == (size - 1)) { 0 } { insIdx + 1 };
 	}
 
+	// Gets element at the specified index. The index is organised as follows:
+	// At index
+	// - 0: the current oldest element 
+	// - 1: the second-oldest element
+	// - size-1: the newest element
+	// - size-2: the element before the newest element
+	// etc.
 	at { |i|
 		if ((i > (size - 1)) || (i < 0)) {
 			// Let out-of-bounds accesses fail
