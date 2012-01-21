@@ -134,5 +134,10 @@ EZ430ChronosDataView : QWindow {
 	update { |data|
 		updateFunc.value(data);
 	}
-	
+
+	close {
+		super.close;
+		graphWin.close;
+	}
+
 }
