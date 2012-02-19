@@ -8,7 +8,7 @@ EZ430ChronosGUI {
 
 	var updateQueue, updateLock, updateNeeded, updateTask, updateLoopEnabled;
 
-	*new { |chronosCount = 1, ports, names, doneFunc|
+	*new { |chronosCount = 1, ports, names, calibPath, doneFunc|
 		var nameCount = 0, portCount = 0, count;
 		if (names.notNil) {
 			if (names.isArray && names.isString.not) {
@@ -33,16 +33,16 @@ EZ430ChronosGUI {
 
 		count = max(chronosCount, max(portCount, nameCount));
 
-		^super.new.init( count, ports, names, doneFunc );
+		^super.new.init( count, ports, names, calibPath, doneFunc );
 	}
 	
-	init { |chronosCount, ports, names, doneFunc|
+	init { |chronosCount, ports, names, calibPath, doneFunc|
 		updateLock = Semaphore(1);
 		updateNeeded = Condition(false);
 
 		{
 			updateLock.wait;
-			this.createChronos(chronosCount, ports, names);
+			this.createChronos(chronosCount, ports, names, calibPath);
 			this.createGui;
 
 			graphwins = Array.fill(chronosCount, nil);
@@ -57,7 +57,7 @@ EZ430ChronosGUI {
 		this.startUpdateLoop;
 	}
 	
-	createChronos { |count, ports, names|
+	createChronos { |count, ports, names, calibPath|
 		chronos = Array(count);
 		count.do { |i|
 			chronos = chronos.add(case
@@ -68,6 +68,11 @@ EZ430ChronosGUI {
 			    { names[i].notNil } { EZ430Chronos(name: names[i]) }
 				{ EZ430Chronos.new }
 			);
+		};
+		calibPath !? {
+			chronos.do { |chr|
+				chr.loadCalibData(path: calibPath);
+			};
 		};
 	}
 
