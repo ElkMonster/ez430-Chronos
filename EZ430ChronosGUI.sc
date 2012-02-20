@@ -4,6 +4,8 @@ EZ430ChronosGUI {
 	var graphUpdateFunc, detailDispUpdateFunc;
 	var vmin, vmax;
 
+	var <startStopButtons;
+
 	var <chronos;
 
 	var updateQueue, updateLock, updateNeeded, updateTask, updateLoopEnabled;
@@ -42,6 +44,7 @@ EZ430ChronosGUI {
 
 		{
 			updateLock.wait;
+			startStopButtons = [];
 			this.createChronos(chronosCount, ports, names, calibPath);
 			this.createGui;
 
@@ -108,6 +111,7 @@ EZ430ChronosGUI {
 				});
 			}
 		});
+		startStopButtons = startStopButtons.add(apBut);
 
 		chr.addCallback({ |x, y, z|
 			this.displayAccData(x, y, z, colIdx)
