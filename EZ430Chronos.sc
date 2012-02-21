@@ -11,10 +11,10 @@ EZ430Chronos {
 
 	classvar allEZ430; // Array holding all EZ430Chronos instances
 
+	var <name; // The name of the EZ430Chronos instance (Chronos0, Chronos1, ...)
 	var <port; // The serial port to read from
 	var <apStarted; // True when access point has started
 
-	var <name; // The name of the EZ430Chronos instance (Chronos0, Chronos1, ...)
 	var <x, <y, <z; // The (calibration-corrected) sensor values
 	var <rawXYZ; // The raw, unchanged sensor values
 
@@ -69,16 +69,14 @@ EZ430Chronos {
 		portname = portname ? this.getSerialPortNameByPlatform;
 		name = name ? ("Chronos" ++ allEZ430.size);
 		this.log("Creating new eZ430 Chronos (" ++ name ++ ") at " ++ portname);
-		^super.new.init(portname, name);
+		^super.newCopyArgs(name).init(portname);
 	}
 
 	// Initialises all instance members, attempts to load existing calibration
 	// data, add this instance to the global instance array (allEZ430), and
 	// opens the specified serial port. If opening the port fails with an
 	// exception, error messages are printed and the exception is re-thrown.
-	init { |portname, vname|
-		name = vname;
-
+	init { |portname|
 		try {
 			port = SerialPort(
 				portname,
@@ -88,8 +86,7 @@ EZ430Chronos {
 				crtscts: false
 			);
 		} { |error|
-			"\n".post;
-			this.log("Opening port " ++ portname ++ " failed. Check if port is valid.");
+			this.log("\nOpening port " ++ portname ++ " failed. Check if port is valid.");
 			this.log("Ports currently available:");
 			SerialPort.listDevices;
 			this.log("Exiting... (and re-throwing exception)");
@@ -449,7 +446,7 @@ EZ430Chronos {
 
 	// Logs the given message, prepended by the instance name.
 	log { |msg, appendNewLine = true|
-		var txt = name ++ ": " ++ msg;
+		var txt = "EZ430Chronos: " ++ name ++ ": " ++ msg;
 		appendNewLine.if { txt.postln } { txt.post };
 	}
 
