@@ -43,18 +43,26 @@ EZ430ChronosGUI {
 		updateNeeded = Condition(false);
 
 		{
+			var err;
+
 			updateLock.wait;
 			startStopButtons = [];
-			this.createChronos(chronosCount, ports, names, calibPath);
-			this.createGui;
+			err = this.createChronos(chronosCount, ports, names, calibPath);
+			if (err.class.superclasses.includes(Error))
+			{
+				this.log("createChronos() error, calling doneFunc with exception");
+				doneFunc.value(this, err);
+			} {
+				this.createGui;
 
-			graphwins = Array.fill(chronosCount, nil);
+				graphwins = Array.fill(chronosCount, nil);
 
-			win.onClose = { this.onClose };
-			win.front;
-			updateLock.signal;
+				win.onClose = { this.onClose };
+				win.front;
+				updateLock.signal;
 
-			doneFunc.value(this);
+				doneFunc.value(this);
+			};
 		}.defer;
 
 		this.startUpdateLoop;
@@ -62,20 +70,25 @@ EZ430ChronosGUI {
 	
 	createChronos { |count, ports, names, calibPath|
 		chronos = Array(count);
-		count.do { |i|
-			chronos = chronos.add(case
-			    { ports[i].notNil && names[i].notNil } {
-					EZ430Chronos(ports[i], names[i])
-				}
-			    { ports[i].notNil } { EZ430Chronos(portname: ports[i]) }
-			    { names[i].notNil } { EZ430Chronos(name: names[i]) }
-				{ EZ430Chronos.new }
-			);
-		};
-		calibPath !? {
-			chronos.do { |chr|
-				chr.loadCalibData(path: calibPath);
+		try {
+			count.do { |i|
+				chronos = chronos.add(case
+					{ ports[i].notNil && names[i].notNil } {
+						EZ430Chronos(ports[i], names[i])
+					}
+					{ ports[i].notNil } { EZ430Chronos(portname: ports[i]) }
+					{ names[i].notNil } { EZ430Chronos(name: names[i]) }
+					{ EZ430Chronos.new }
+				);
 			};
+			calibPath !? {
+				chronos.do { |chr|
+					chr.loadCalibData(path: calibPath);
+				};
+			};
+		} { |error|
+			this.log("returning error");
+			^error;
 		};
 	}
 
@@ -259,12 +272,14 @@ EZ430ChronosGUI {
 	}
 
 	close {
+		this.log("close");
 		// win will call onClose
 		win.close;
 	}
 
 	onClose {
 		this.runTask({
+			this.log("onClose");
 			updateLoopEnabled = false;
 			updateNeeded.test = true;
 			updateNeeded.signal;
@@ -283,5 +298,9 @@ EZ430ChronosGUI {
 		Task({
 			f.do { |func| func.value }
 		}).start(AppClock);
+	}
+
+	log { |msg|
+		("EZ430ChronosGUI: " ++ msg).postln;
 	}
 }
