@@ -103,9 +103,14 @@ EZ430Chronos {
 				crtscts: false
 			);
 		} { |error|
-			this.log("\nOpening port " ++ portname ++ " failed. Check if port is valid.");
+			"\n".postln; // SerialPort doesn't break line in case of error msg
+			this.log("Opening port " ++ portname ++ " failed. Check if port is valid.");
 			this.log("Ports currently available:");
-			SerialPort.listDevices;
+			SerialPort.devices.do { |devName|
+				var takenBy = EZ430Chronos.getChronosByPortname(devName);
+				var takenInfo = takenBy !? { " (taken by " ++ takenBy.name ++ ")" } ? "";
+				this.log("    " ++ devName ++ takenInfo);
+			};
 			this.log("Exiting... (and re-throwing exception)");
 			error.throw;
 		};
