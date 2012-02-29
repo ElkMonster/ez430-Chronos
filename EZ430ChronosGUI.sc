@@ -138,7 +138,7 @@ EZ430ChronosGUI {
 		line.decorator = FlowLayout(line.bounds);
 
 		ledBut = Button(line, 10@16)
-		.states_([[nil, nil, Color.red], [nil, nil, Color.green]])
+		.states_([["", nil, Color.red], ["", nil, Color.green]])
 		.enabled_(false);
 		label = StaticText(line, 15@20).align_(\right).string_("x:");
 		xlabel.add(StaticText(line, 30@20).align_(\right).string_("-"));
