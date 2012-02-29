@@ -12,6 +12,7 @@ EZ430Chronos {
 	classvar allEZ430; // Array holding all EZ430Chronos instances
 
 	var <name; // The name of the EZ430Chronos instance (Chronos0, Chronos1, ...)
+	var <portname; // The name of the port, since SerialPort doesn't store it
 	var <port; // The serial port to read from
 	var <apStarted; // True when access point has started
 
@@ -51,12 +52,28 @@ EZ430Chronos {
 		eZ430ReqDataMsg = Int8Array[255, 8, 7, 0, 0, 0, 0];
 	}
 
+	*getChronosByPortname { |portname|
+		^allEZ430.detect { |chronos|
+			chronos.portname == portname;
+		};
+	}
+
 	*getSerialPortNameByPlatform {
 		var index = allEZ430.size;
 		^Platform.case(
-			// OS X case will fail once you connect  more than 9 chronos'
-			\osx, { "/dev/ttyusbmodem00" ++ (index + 1) },
 			\linux, { "/dev/ttyACM" ++ index },
+			\osx, {
+				// OS X assigns names a little less predictable...
+				var pattern = "^/dev/tty.usbmodem";
+				SerialPort.devices.detect { |devName|
+					var patternMatches = pattern.matchRegexp(devName);
+					var portAvailable = true;
+					allEZ430.isEmpty.not.if {
+						portAvailable = this.getChronosByPortname(devName).isNil;
+					};
+					patternMatches and: portAvailable;
+				};
+			},
 			\windows, { "Not implemented" }
 		);
 	}
@@ -69,14 +86,14 @@ EZ430Chronos {
 		portname = portname ? this.getSerialPortNameByPlatform;
 		name = name ? ("Chronos" ++ allEZ430.size);
 		this.log("Creating new eZ430 Chronos (" ++ name ++ ") at " ++ portname);
-		^super.newCopyArgs(name).init(portname);
+		^super.newCopyArgs(name, portname).init;
 	}
 
 	// Initialises all instance members, attempts to load existing calibration
 	// data, add this instance to the global instance array (allEZ430), and
-	// opens the specified serial port. If opening the port fails with an
+	// opens the serial port specified by portname. If opening the port fails with an
 	// exception, error messages are printed and the exception is re-thrown.
-	init { |portname|
+	init {
 		try {
 			port = SerialPort(
 				portname,
