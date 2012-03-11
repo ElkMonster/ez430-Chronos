@@ -4,6 +4,8 @@ EZ430ChronosGUI {
 	var graphUpdateFunc, detailDispUpdateFunc;
 	var vmin, vmax;
 
+	var displayAccDataFunc;
+
 	var <startStopButtons;
 
 	var <chronos;
@@ -53,9 +55,10 @@ EZ430ChronosGUI {
 				this.log("createChronos() error, calling doneFunc with exception");
 				doneFunc.value(this, err);
 			} {
+				displayAccDataFunc = nil ! chronosCount;
 				this.createGui;
 
-				graphwins = Array.fill(chronosCount, nil);
+				graphwins = nil ! chronosCount;
 
 				win.onClose = { this.onClose };
 				win.front;
@@ -126,9 +129,10 @@ EZ430ChronosGUI {
 		});
 		startStopButtons = startStopButtons.add(apBut);
 
-		chr.addCallback({ |x, y, z|
+		displayAccDataFunc[colIdx] = { |x, y, z|
 			this.displayAccData(x, y, z, colIdx)
-		});
+		};
+		chr.addCallback(displayAccDataFunc[colIdx]);
 		chr.addOnConnectCallback({
 			("Connection to " ++ chr.name ++ " established").postln;
 			this.runTask({ ledBut.value = 1 });
@@ -218,12 +222,12 @@ EZ430ChronosGUI {
 		gz = SimpleGraph(w, Rect(50, 518, 550, 258), 66, framed: true, helpLines: helpLines);
 
 		graphUpdateFunc = { |x, y, z|
-			if (graphwins[i].notNil) {
+			graphwins[i] !? {
 				gx.addData(x);
 				gy.addData(y);
 				gz.addData(z);
 				this.enqueueForUpdate({
-					if (graphwins[i].notNil) { [gx, gy, gz].do(_.refresh) };
+					graphwins[i] !? { [gx, gy, gz].do(_.refresh) };
 				});
 			};
 		};
@@ -263,7 +267,7 @@ EZ430ChronosGUI {
 
 	displayAccData { |x, y, z, chronosIdx|
 		this.runTask({
-			win.isClosed.not.if {
+			if (win.isClosed.not and: win.visible) {
 				xlabel[chronosIdx].string = x;
 				ylabel[chronosIdx].string = y;
 				zlabel[chronosIdx].string = z;
@@ -298,6 +302,19 @@ EZ430ChronosGUI {
 		Task({
 			f.do { |func| func.value }
 		}).start(AppClock);
+	}
+
+	visible_ { |v|
+		if (win.visible.not and: v) {
+			// Attempting to make win visible
+			chronos.do { |c, i| c.addCallback(displayAccDataFunc[i]) };
+		} {
+			// Attempting to make win invisible
+			if (win.visible and: v.not) {
+				chronos.do { |c, i| c.removeCallback(displayAccDataFunc[i]) };
+			};
+		};
+		win.visible = v;
 	}
 
 	log { |msg|
