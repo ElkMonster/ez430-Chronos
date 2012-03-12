@@ -180,14 +180,17 @@ EZ430ChronosGUI {
 			this.enqueueForUpdate({ dataDetailView.update(data) });
 		};
 		dataDetailBut.addAction({ |button|
-			var w;
+			// TODO Preserve original calculateExtendedData value if it is true
+			// already
 			if (button.value == 1) {
+				chr.data.calculateExtendedData = true;
 				this.enqueueForUpdate { chr.addDataCallback(detailDispUpdateFunc) };
 				dataDetailView = EZ430ChronosDataView.new.front;
 			} {
 				this.enqueueForUpdate { chr.removeDataCallback(detailDispUpdateFunc) };
 				dataDetailView.close;
 				dataDetailView = nil;
+				chr.data.calculateExtendedData = false;
 			};
 		});
 
