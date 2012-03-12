@@ -283,6 +283,7 @@ EZ430ChronosGUI {
 		this.log("close");
 		// win will call onClose
 		win !? { win.close };
+		this.runTask({ chronos.do(_.quit) });
 	}
 
 	onClose {
@@ -294,7 +295,6 @@ EZ430ChronosGUI {
 			updateLock.wait;
 			updateTask.stop;
 			
-			chronos.do(_.quit);
 			graphwins.do { |w| w !? { w.close } };
 			dataDetailView !? { dataDetailView.close };
 			
