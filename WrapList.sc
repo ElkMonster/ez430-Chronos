@@ -59,7 +59,7 @@ WrapList {
 	// - size-2: the element before the newest element
 	// etc.
 	at { |i|
-		if ((i > (size - 1)) || (i < 0)) {
+		if ((i >= size) || (i < 0)) {
 			// Let out-of-bounds accesses fail
 			^arr[i];
 		} {
