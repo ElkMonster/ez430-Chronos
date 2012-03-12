@@ -62,6 +62,7 @@ EZ430ChronosGUI {
 
 				win.onClose = { this.onClose };
 				win.front;
+
 				updateLock.signal;
 
 				doneFunc.value(this);
@@ -267,7 +268,7 @@ EZ430ChronosGUI {
 
 	displayAccData { |x, y, z, chronosIdx|
 		this.runTask({
-			if (win.isClosed.not and: win.visible) {
+			win.isClosed.not.if {
 				xlabel[chronosIdx].string = x;
 				ylabel[chronosIdx].string = y;
 				zlabel[chronosIdx].string = z;
@@ -278,7 +279,7 @@ EZ430ChronosGUI {
 	close {
 		this.log("close");
 		// win will call onClose
-		win.close;
+		win !? { win.close };
 	}
 
 	onClose {
@@ -305,14 +306,10 @@ EZ430ChronosGUI {
 	}
 
 	visible_ { |v|
-		if (win.visible.not and: v) {
-			// Attempting to make win visible
+		v.if {
 			chronos.do { |c, i| c.addCallback(displayAccDataFunc[i]) };
 		} {
-			// Attempting to make win invisible
-			if (win.visible and: v.not) {
-				chronos.do { |c, i| c.removeCallback(displayAccDataFunc[i]) };
-			};
+			chronos.do { |c, i| c.removeCallback(displayAccDataFunc[i]) };
 		};
 		win.visible = v;
 	}
