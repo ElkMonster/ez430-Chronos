@@ -50,7 +50,7 @@ EZ430ChronosGUI {
 			updateLock.wait;
 			startStopButtons = [];
 			err = this.createChronos(chronosCount, ports, names, calibPath);
-			if (err.class.superclasses.includes(Error))
+			if (err.isKindOf(Error))
 			{
 				this.log("createChronos() error, calling doneFunc with exception");
 				doneFunc.value(this, err);
