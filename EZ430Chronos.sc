@@ -243,7 +243,7 @@ EZ430Chronos {
 				this.queryAccData.if {
 					accDataSemaphore.wait;
 
-					if (dataCallbacks.array.size > 0) {
+					dataCallbacks.array.isEmpty.not.if {
 						data.update([x, y, z], rawXYZ)
 					};
 					callbacks.do(_.value(x, y, z));
@@ -369,11 +369,8 @@ EZ430Chronos {
 			calibPosCorrFac[i] = 77 / (77 - calibOffset[i]);
 			calibNegCorrFac[i] = 77 / (77 + calibOffset[i]);
 		};
-		"calib offsets:".postln;
-		calibOffset.postln;
-		"calib corr factors:".postln;
-		calibPosCorrFac.postln;
-		calibNegCorrFac.postln;
+		this.log("calib offsets: " ++ calibOffset);
+		this.log("calib corr factors:\n" ++ calibPosCorrFac ++ "\n" ++ calibNegCorrFac);
 	}
 
 	// Saves the calibration data to a file in order to re-use it. If no path is
@@ -479,10 +476,23 @@ EZ430Chronos {
 
 	// Removes all EZ430Chronos instances by calling their quit() methods.
 	*removeAll {
-		Task({
-			var all = allEZ430;
-			allEZ430 = Array[];
+		var all, quitTask;
+		var quitDone = false;
+		var quitCheckerTask = Task({
+			3.0.wait;
+			quitDone.not.if {
+				this.log("Closing serial port seems to hang, forcing cleanup...");
+				SerialPort.cleanupAll;
+				quitTask.stop;
+				this.log("Forced cleanup done");
+			};
+		});
+		all = allEZ430;
+		allEZ430 = Array[];
+		quitTask = Task({
+			quitCheckerTask.start;
 			all.do(_.quit);
+			quitDone = true;
 		}).start;
 	}
 
