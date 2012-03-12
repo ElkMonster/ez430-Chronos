@@ -447,7 +447,7 @@ EZ430Chronos {
 			apStarted = false;
 		} {
 			"Failure (answer was: ".post;
-			(answer.size - 1).do{ |n| (answer[n] ++ " ").post };
+			(answer.size - 1).do { |n| (answer[n] ++ " ").post };
 			(answer[answer.size - 1] ++ ")").postln;
 		};
 	}
@@ -457,7 +457,7 @@ EZ430Chronos {
 	// array.
 	quit {
 		this.log("Quitting...");
-		apStarted.if(this.stopAP);
+		apStarted.if { this.stopAP };
 		port.close;
 		allEZ430.remove(this);
 		this.log("Done quitting");

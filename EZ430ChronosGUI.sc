@@ -291,8 +291,8 @@ EZ430ChronosGUI {
 			updateTask.stop;
 			
 			chronos.do(_.quit);
-			graphwins.do({ |w| w.notNil.if { w.close } });
-			dataDetailView.notNil.if { dataDetailView.close };
+			graphwins.do { |w| w !? { w.close } };
+			dataDetailView !? { dataDetailView.close };
 			
 			updateLock.signal;
 		});
