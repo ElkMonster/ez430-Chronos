@@ -254,8 +254,8 @@ EZ430Chronos {
 			};
 			
 			accDataQueryStopReq = false;
-			onStopReadingCallbacks.do(_.value(this, name));	
-
+			onStopReadingCallbacks.do(_.value(this, name));
+			this.log("Data reading loop stopped");
 		}).start;
 	}
 
@@ -272,7 +272,7 @@ EZ430Chronos {
 
 	// Removes the given callback function.
 	removeCallback { |callback_f|
-		callbacks.removeFunc(callback_f);
+		callbacks = callbacks.removeFunc(callback_f);
 	}
 
 	// Adds the given callback function. It is called each time the chronos
@@ -284,7 +284,7 @@ EZ430Chronos {
 
 	// Removes the given callback function.
 	removeDataCallback { |callback_f|
-		dataCallbacks.removeFunc(callback_f);
+		dataCallbacks = dataCallbacks.removeFunc(callback_f);
 	}
 
 	// Adds the given callback function. It is called when the chronos has
@@ -296,7 +296,7 @@ EZ430Chronos {
 
 	// Removes the given callback function.
 	removeOnConnectCallback { |callback_f|
-		onConnectCallbacks.removeFunc(callback_f);
+		onConnectCallbacks = onConnectCallbacks.removeFunc(callback_f);
 	}
 
 	// Adds the given callback function. It is called when the loop that polls
@@ -308,7 +308,7 @@ EZ430Chronos {
 
 	// Removes the given callback function.
 	removeOnStopReadingCallback { |callback_f|
-		onStopReadingCallbacks.removeFunc(callback_f);
+		onStopReadingCallbacks = onStopReadingCallbacks.removeFunc(callback_f);
 	}
 
 	// Starts or stops calibration. When called the first time, calibration mode
