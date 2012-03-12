@@ -243,7 +243,7 @@ EZ430Chronos {
 				this.queryAccData.if {
 					accDataSemaphore.wait;
 
-					if (dataCallbacks.array.size > 0) {
+					dataCallbacks !? {
 						data.update([x, y, z], rawXYZ)
 					};
 					callbacks.do(_.value(x, y, z));
