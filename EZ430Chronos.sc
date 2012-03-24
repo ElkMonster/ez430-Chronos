@@ -59,23 +59,19 @@ EZ430Chronos {
 	}
 
 	*getSerialPortNameByPlatform {
-		var index = allEZ430.size;
-		^Platform.case(
-			\linux, { "/dev/ttyACM" ++ index },
-			\osx, {
-				// OS X assigns names a little less predictable...
-				var pattern = "^/dev/tty.usbmodem";
-				SerialPort.devices.detect { |devName|
-					var patternMatches = pattern.matchRegexp(devName);
-					var portAvailable = true;
-					allEZ430.isEmpty.not.if {
-						portAvailable = this.getChronosByPortname(devName).isNil;
-					};
-					patternMatches and: portAvailable;
-				};
-			},
+		var pattern = Platform.case(
+			\linux, { "^/dev/ttyACM" },
+			\osx, { "^/dev/tty.usbmodem" },
 			\windows, { "Not implemented" }
 		);
+		^SerialPort.devices.detect { |devName|
+			var patternMatches = pattern.matchRegexp(devName);
+			var portAvailable = true;
+			allEZ430.isEmpty.not.if {
+				portAvailable = this.getChronosByPortname(devName).isNil;
+			};
+			patternMatches and: portAvailable;
+		};
 	}
 
 	// Creates a EZ430Chronos instance. If no port is specified, /dev/ttyACMn is
